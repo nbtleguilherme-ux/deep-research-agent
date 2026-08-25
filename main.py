@@ -4,9 +4,6 @@ main.py — Chạy tác tử từ dòng lệnh.
 Cách dùng:
     python main.py "chủ đề nghiên cứu của bạn"
     python main.py --check         # kiểm tra môi trường (LLM + web search) trước khi code
-    python main.py --solution "chủ đề"   # chạy bản lời giải mẫu của giảng viên
-
-ĐÃ CUNG CẤP SẴN — sinh viên không cần sửa.
 """
 import sys
 import os
@@ -44,17 +41,13 @@ def main():
         check_environment()
         return
 
-    use_solution = "--solution" in argv
     topic_parts = [a for a in argv if not a.startswith("--")]
     topic = " ".join(topic_parts).strip() or input("Nhập chủ đề nghiên cứu: ").strip()
     if not topic:
         print("Chưa có chủ đề. Kết thúc.")
         return
 
-    if use_solution:
-        from solution import agent  # bản lời giải của giảng viên
-    else:
-        import agent                # bản sinh viên hoàn thành
+    import agent
 
     print(f"\n🔎 Bắt đầu nghiên cứu: {topic}\n" + "=" * 60)
     report, notes = agent.run_deep_research(topic)
