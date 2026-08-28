@@ -5,13 +5,10 @@ tools.py — CÁC CẢM BIẾN (SENSORS) của tác tử: nhìn vào "thế gi�
     - web_search(query)      -> danh sách kết quả [{title, url, snippet}]
     - fetch_page_text(url)   -> nội dung văn bản của một trang web
 
-Cơ chế:
-    * Nếu có SERPER_API_KEY  -> tìm kiếm Google qua serper.dev (chất lượng cao).
-    * Nếu không              -> dùng DuckDuckGo (miễn phí, không cần khóa API).
+Cơ chế (thứ tự ưu tiên):
+    1. Tavily (TAVILY_API_KEY) — tối ưu cho AI agent, có free tier.
+    2. DuckDuckGo             — miễn phí, không cần khóa API.
 """
-import json
-import http.client
-
 import requests
 
 import config
@@ -29,18 +26,22 @@ _UA = {
 }
 
 
-def _search_serper(query, max_results):
-    conn = http.client.HTTPSConnection("google.serper.dev", timeout=20)
-    payload = json.dumps({"q": query})
-    headers = {"X-API-KEY": config.SERPER_API_KEY, "Content-Type": "application/json"}
-    conn.request("POST", "/search", payload, headers)
-    data = json.loads(conn.getresponse().read().decode("utf-8"))
+def _search_tavily(query, max_results):
+    """Tìm kiếm qua Tavily AI Search API (https://app.tavily.com)."""
+    payload = {
+        "api_key": config.TAVILY_API_KEY,
+        "query": query,
+        "max_results": max_results,
+        "search_depth": "basic",
+    }
+    resp = requests.post("https://api.tavily.com/search", json=payload, timeout=20)
+    resp.raise_for_status()
     out = []
-    for r in data.get("organic", [])[:max_results]:
+    for r in resp.json().get("results", [])[:max_results]:
         out.append({
             "title": r.get("title", ""),
-            "url": r.get("link", ""),
-            "snippet": r.get("snippet", ""),
+            "url": r.get("url", ""),
+            "snippet": r.get("content", ""),
         })
     return out
 
@@ -65,8 +66,8 @@ def web_search(query, max_results=None):
     """Tìm kiếm web, trả về danh sách [{title, url, snippet}]."""
     max_results = max_results or config.RESULTS_PER_QUERY
     try:
-        if config.SERPER_API_KEY:
-            return _search_serper(query, max_results)
+        if config.TAVILY_API_KEY:
+            return _search_tavily(query, max_results)
         return _search_ddg(query, max_results)
     except Exception as e:
         print(f"[web_search] Lỗi khi tìm '{query}': {e}")

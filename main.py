@@ -20,8 +20,8 @@ import tools
 def check_environment():
     """Kiểm tra nhanh: gọi được LLM chưa, tìm kiếm web chưa."""
     print("== KIỂM TRA MÔI TRƯỜNG ==")
-    print(f"LLM  : {config.OPENAI_BASE_URL}  (model={config.MODEL})")
-    print(f"Search: {'Serper (Google)' if config.SERPER_API_KEY else 'DuckDuckGo (miễn phí)'}")
+    print(f"LLM   : Gemini  (model={config.GEMINI_MODEL})")
+    print(f"Search: {'Tavily' if config.TAVILY_API_KEY else 'DuckDuckGo (miễn phí)'}")
     try:
         msg = llm.chat([{"role": "user", "content": "Trả lời đúng một từ: OK"}], max_tokens=10)
         print(f"[LLM ] Phản hồi: {msg.strip()[:60]}")
