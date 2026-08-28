@@ -48,11 +48,8 @@ def generate_search_queries(topic, n=None):
 
     Ứng với PEAS: ACTUATOR (tác tử "hành động" bằng cách gửi truy vấn tới máy tìm kiếm).
 
-    GỢI Ý (bắt chước analyze_source):
-      1. n = n or config.QUERIES_PER_ROUND
-      2. user = prompts.build_query_user(topic, n)
-      3. data = llm.chat_json(prompts.QUERY_WRITER_SYSTEM, user)
-      4. Trả về data["queries"] (một list các chuỗi). Nhớ phòng trường hợp thiếu khóa.
+    GỢI Ý: Bắt chước analyze_source — build prompt, gọi LLM, trả về list[str].
+            Khám phá module prompts để tìm hàm và hằng số phù hợp.
     """
     n = n or config.QUERIES_PER_ROUND
     raise NotImplementedError("TODO 1: hãy hoàn thành generate_search_queries()")
@@ -72,11 +69,8 @@ def reflect(topic, notes, max_followups=None):
         "follow_up_queries": list[str],   # truy vấn bổ sung nếu chưa đủ
     }
 
-    GỢI Ý:
-      1. max_followups = max_followups or config.QUERIES_PER_ROUND
-      2. user = prompts.build_reflection_user(topic, notes, max_followups)
-      3. data = llm.chat_json(prompts.REFLECTION_SYSTEM, user)
-      4. Chuẩn hóa & trả về dict với 3 khóa trên (dùng .get(...) để an toàn).
+    GỢI Ý: Cùng mẫu với TODO 1 — build prompt từ notes, gọi LLM, chuẩn hóa kết quả.
+            Dùng .get() khi đọc dict để tránh KeyError.
     """
     max_followups = max_followups or config.QUERIES_PER_ROUND
     raise NotImplementedError("TODO 2: hãy hoàn thành reflect()")
@@ -93,11 +87,8 @@ def write_report(topic, notes):
     LƯU Ý: Prompt ANSWER yêu cầu trả về VĂN BẢN (Markdown), KHÔNG phải JSON
            => dùng llm.chat(messages) chứ KHÔNG dùng llm.chat_json.
 
-    GỢI Ý:
-      1. user = prompts.build_answer_user(topic, notes)
-      2. messages = [{"role":"system","content":prompts.ANSWER_SYSTEM},
-                     {"role":"user","content":user}]
-      3. return llm.chat(messages, max_tokens=8192)
+    GỢI Ý: Dùng llm.chat() (KHÔNG phải chat_json) vì kết quả là văn bản Markdown.
+            Xem cách truyền messages trong llm.py để biết định dạng.
     """
     raise NotImplementedError("TODO 3: hãy hoàn thành write_report()")
 
@@ -110,27 +101,10 @@ def run_deep_research(topic):
 
     Đây là "chương trình tác tử" — nơi PEAS được kết nối lại với nhau.
 
-    THUẬT TOÁN GỢI Ý:
-      queries = generate_search_queries(topic)          # ACTUATOR
-      notes, seen_urls = [], set()
-      for loop in range(config.MAX_RESEARCH_LOOPS + 1):
-          for q in queries:
-              for r in tools.web_search(q):             # SENSOR: kết quả tìm kiếm
-                  if not r["url"] or r["url"] in seen_urls: continue
-                  seen_urls.add(r["url"])
-                  text = tools.fetch_page_text(r["url"]) # SENSOR: nội dung trang
-                  if not text: continue
-                  note = analyze_source(topic, r, text)  # NHẬN THỨC
-                  if note["useful"] and note["summary"]:
-                      notes.append(note)
-          verdict = reflect(topic, notes)                # PERFORMANCE
-          if verdict["is_sufficient"] or loop == config.MAX_RESEARCH_LOOPS:
-              break
-          queries = verdict["follow_up_queries"]         # vòng lặp: truy vấn mới
-      report = write_report(topic, notes)                # ACTUATOR
-      return report, notes
-
-    MẸO: dùng print(...) để in tiến trình (đang tìm gì, tải trang nào, còn/đủ...)
-         giúp quan sát tác tử "suy nghĩ".
+    GỢI Ý: Kết nối TODO 1-3 thành vòng lặp:
+        - Sinh truy vấn → tìm kiếm & tải trang → phân tích từng trang → phản tư.
+        - Nếu chưa đủ và còn vòng lặp: dùng truy vấn bổ sung từ reflect().
+        - Tránh tải cùng một URL hai lần.
+        - In tiến trình bằng print() để quan sát tác tử "suy nghĩ".
     """
     raise NotImplementedError("TODO 4: hãy hoàn thành run_deep_research()")
