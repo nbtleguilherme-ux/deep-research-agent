@@ -17,10 +17,14 @@ import tools
 def check_environment():
     """Kiểm tra nhanh: gọi được LLM chưa, tìm kiếm web chưa."""
     print("== KIỂM TRA MÔI TRƯỜNG ==")
-    print(f"LLM  : {config.OPENAI_BASE_URL}  (model={config.MODEL})")
-    print(f"Search: {'Serper (Google)' if config.SERPER_API_KEY else 'DuckDuckGo (miễn phí)'}")
+    print(f"LLM   : Gemini  (model={config.GEMINI_MODEL})")
+    if config.TAVILY_API_KEY:
+        search_backend = "Tavily"
+    else:
+        search_backend = "DuckDuckGo (miễn phí)"
+    print(f"Search: {search_backend}")
     try:
-        msg = llm.chat([{"role": "user", "content": "Trả lời đúng một từ: OK"}], max_tokens=10)
+        msg = llm.chat([{"role": "user", "content": "Trả lời đúng một từ: OK"}])
         print(f"[LLM ] Phản hồi: {msg.strip()[:60]}")
     except Exception as e:
         print(f"[LLM ] LỖI: {e}")

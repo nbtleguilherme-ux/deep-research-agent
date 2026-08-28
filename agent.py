@@ -28,7 +28,7 @@ import prompts
 def analyze_source(topic, result, page_text):
     """Tóm tắt 1 trang web thành note = {"url", "summary", "useful"}."""
     user = prompts.build_analyze_user(topic, result["title"], result["url"], page_text)
-    data = llm.chat_json(prompts.ANALYZE_SYSTEM, user, max_tokens=800)
+    data = llm.chat_json(prompts.ANALYZE_SYSTEM, user, max_tokens=1500)
     return {
         "url": result["url"],
         "summary": data.get("summary", ""),
@@ -70,7 +70,7 @@ def write_report(topic, notes):
         {"role": "system", "content": prompts.ANSWER_SYSTEM},
         {"role": "user", "content": user},
     ]
-    return llm.chat(messages, temperature=0.3, max_tokens=2000)
+    return llm.chat(messages, temperature=0.3, max_tokens=8192)
 
 
 # TODO 4 — AGENT PROGRAM: vòng lặp Cảm nhận–Suy nghĩ–Hành động
