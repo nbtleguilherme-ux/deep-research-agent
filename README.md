@@ -34,6 +34,20 @@ Cho một **chủ đề nghiên cứu**, tác tử tự động:
 
 ## 3. Cài đặt & kiểm tra môi trường
 
+### 3.1 Cài đặt Python (nếu chưa có)
+
+1. Truy cập [https://www.python.org/downloads/](https://www.python.org/downloads/) và tải **Python 3.11** hoặc mới hơn.
+2. Chạy file `.exe` vừa tải. **Quan trọng:** tích vào ô **"Add Python to PATH"** trước khi nhấn *Install Now*.
+3. Sau khi cài xong, mở **Command Prompt** (hoặc **PowerShell**) và kiểm tra:
+
+```
+python --version
+```
+
+Kết quả phải hiện ví dụ `Python 3.11.x`. Nếu báo lỗi `'python' is not recognized`, hãy khởi động lại máy rồi thử lại.
+
+### 3.2 Cài thư viện và chạy thử
+
 ```bash
 cd practice/session3
 python -m venv .venv && .venv\Scripts\activate      # Windows
@@ -42,6 +56,8 @@ copy .env.example .env          # rồi mở .env điền OPENAI_BASE_URL / OPEN
 
 python main.py --check          # kiểm tra LLM + web search hoạt động chưa
 ```
+
+> **Lưu ý:** Mỗi lần mở terminal mới, cần chạy lại `.venv\Scripts\activate` để kích hoạt môi trường ảo trước khi dùng `python` hay `pip`.
 
 ## 4. Nhiệm vụ — hoàn thành 4 hàm trong `agent.py`
 
