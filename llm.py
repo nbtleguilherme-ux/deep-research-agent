@@ -50,12 +50,12 @@ def chat(messages, temperature=0.3, max_tokens=1500):
 
     for attempt in range(4):
         try:
-            chat_session = _client.chats.create(
+            chat = _client.chats.create(
                 model=config.GEMINI_MODEL,
                 config=gen_config,
                 history=history,
             )
-            response = chat_session.send_message(last_msg)
+            response = chat.send_message(last_msg)
             return response.text
         except Exception as e:
             msg = str(e)

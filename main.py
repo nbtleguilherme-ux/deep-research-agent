@@ -4,9 +4,6 @@ main.py — Chạy tác tử từ dòng lệnh.
 Cách dùng:
     python main.py "chủ đề nghiên cứu của bạn"
     python main.py --check         # kiểm tra môi trường (LLM + web search) trước khi code
-    python main.py --solution "chủ đề"   # chạy bản lời giải mẫu của giảng viên
-
-ĐÃ CUNG CẤP SẴN — sinh viên không cần sửa.
 """
 import sys
 import os
@@ -21,9 +18,13 @@ def check_environment():
     """Kiểm tra nhanh: gọi được LLM chưa, tìm kiếm web chưa."""
     print("== KIỂM TRA MÔI TRƯỜNG ==")
     print(f"LLM   : Gemini  (model={config.GEMINI_MODEL})")
-    print(f"Search: {'Tavily' if config.TAVILY_API_KEY else 'DuckDuckGo (miễn phí)'}")
+    if config.TAVILY_API_KEY:
+        search_backend = "Tavily"
+    else:
+        search_backend = "DuckDuckGo (miễn phí)"
+    print(f"Search: {search_backend}")
     try:
-        msg = llm.chat([{"role": "user", "content": "Trả lời đúng một từ: OK"}], max_tokens=10)
+        msg = llm.chat([{"role": "user", "content": "Trả lời đúng một từ: OK"}])
         print(f"[LLM ] Phản hồi: {msg.strip()[:60]}")
     except Exception as e:
         print(f"[LLM ] LỖI: {e}")
@@ -44,17 +45,13 @@ def main():
         check_environment()
         return
 
-    use_solution = "--solution" in argv
     topic_parts = [a for a in argv if not a.startswith("--")]
     topic = " ".join(topic_parts).strip() or input("Nhập chủ đề nghiên cứu: ").strip()
     if not topic:
         print("Chưa có chủ đề. Kết thúc.")
         return
 
-    if use_solution:
-        from solution import agent  # bản lời giải của giảng viên
-    else:
-        import agent                # bản sinh viên hoàn thành
+    import agent
 
     print(f"\n🔎 Bắt đầu nghiên cứu: {topic}\n" + "=" * 60)
     report, notes = agent.run_deep_research(topic)
